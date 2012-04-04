@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "no_downtime_migrations"
   gem.homepage = "http://github.com/vivrass/no_downtime_migrations"
   gem.license = "MIT"
-  gem.summary = %Q{TODO: one-line summary of your gem}
-  gem.description = %Q{TODO: longer description of your gem}
+  gem.summary = %Q{Migrate your code to prodution without downtime}
+  gem.description = %Q{If downtime is not an option for you, this gem will help you manage your migration with that requirement.}
   gem.email = "mprovencher86@gmail.com"
   gem.authors = ["Martin Provencher"]
   # dependencies defined in Gemfile
