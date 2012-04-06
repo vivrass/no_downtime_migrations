@@ -1,1 +1,1 @@
-require 'no_downtime_migrations/copy_column'
+require 'no_downtime_migrations/mirror_columns'

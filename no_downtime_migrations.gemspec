@@ -26,11 +26,11 @@ Gem::Specification.new do |s|
     "VERSION",
     "init.rb",
     "lib/no_downtime_migrations.rb",
-    "lib/no_downtime_migrations/copy_column.rb",
+    "lib/no_downtime_migrations/mirror_columns.rb",
     "no_downtime_migrations.gemspec",
     "rails/init.rb",
     "test/helper.rb",
-    "test/units/test_copy_column.rb"
+    "test/units/test_mirror_columns.rb"
   ]
   s.homepage = "http://github.com/vivrass/no_downtime_migrations"
   s.licenses = ["MIT"]

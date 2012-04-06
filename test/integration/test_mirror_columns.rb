@@ -1,11 +1,11 @@
 require 'helper'
 require 'logger'
 
-class TestCopyColumn < Test::Unit::TestCase
+class TestMirrorColumns < Test::Unit::TestCase
   MIGRATION_PATH = "#{File.dirname(__FILE__)}/migrations"
   MIGRATION_CREATE_USER_VERSION        = 1;
-  MIGRATION_CREATE_COPY_COLUMN_VERSION = 2;
-  MIGRATION_REMOVE_COPY_COLUMN_VERSION = 3;
+  MIGRATION_CREATE_MIRROR_COLUMN_VERSION = 2;
+  MIGRATION_REMOVE_MIRROR_COLUMN_VERSION = 3;
 
   context "given a MySQL adapter" do
     setup do
@@ -25,7 +25,7 @@ class TestCopyColumn < Test::Unit::TestCase
       assert !@user.respond_to?(:encrypted_password)
 
 
-      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_CREATE_COPY_COLUMN_VERSION)
+      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_CREATE_MIRROR_COLUMN_VERSION)
       User.reset_column_information
 
       assert_equal 2, ActiveRecord::Base.connection.execute("SHOW TRIGGERS;").count
@@ -132,7 +132,7 @@ class TestCopyColumn < Test::Unit::TestCase
       test_user @user, :name => name, :email => new_email, :password => new_password
 
       # Verify drop
-      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_REMOVE_COPY_COLUMN_VERSION)
+      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_REMOVE_MIRROR_COLUMN_VERSION)
       User.reset_column_information
       assert_equal 0, ActiveRecord::Base.connection.execute("SHOW TRIGGERS;").count
     end

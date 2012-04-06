@@ -9,26 +9,26 @@ class MockAdapter < ActiveRecord::ConnectionAdapters::AbstractAdapter
   end
 end
 
-class TestCopyColumn < Test::Unit::TestCase
+class TestMirrorColumns < Test::Unit::TestCase
   context "given an adapter" do
     setup do
       @connection = NullConnection
       @adapter = MockAdapter.new(@connection)
     end
 
-    context "#create_copy_column" do
+    context "#add_mirror_columns" do
       should "execute a copy of the first column into the second" do
         expected_sql = "UPDATE table_name SET second_column = first_column"
         assert_expects_params @adapter, :execute, expected_sql do
-          @adapter.create_copy_column("table_name", "first_column" => "second_column")
+          @adapter.add_mirror_columns("table_name", "first_column" => "second_column")
         end
       end
 
       context "sql insert" do
         should "execute a old trigger drop" do
-          expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_insert;"
+          expected_sql = "DROP TRIGGER IF EXISTS table_name_mirror_columns_first_column_second_column_on_insert;"
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column" => "second_column")
+            @adapter.add_mirror_columns("table_name", "first_column" => "second_column")
           end
         end
 
@@ -36,7 +36,7 @@ class TestCopyColumn < Test::Unit::TestCase
           found = 0
           expected_sql = <<-SQL
             CREATE TRIGGER 
-              table_name_copy_column_first_column_second_column_on_insert
+              table_name_mirror_columns_first_column_second_column_on_insert
             BEFORE insert ON
               table_name
             FOR EACH ROW
@@ -51,16 +51,16 @@ class TestCopyColumn < Test::Unit::TestCase
           SQL
 
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column" => "second_column")
+            @adapter.add_mirror_columns("table_name", "first_column" => "second_column")
           end
         end
       end
 
       context "sql update" do
         should "execute a old trigger drop" do
-          expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_update;"
+          expected_sql = "DROP TRIGGER IF EXISTS table_name_mirror_columns_first_column_second_column_on_update;"
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column" => "second_column")
+            @adapter.add_mirror_columns("table_name", "first_column" => "second_column")
           end
         end
 
@@ -68,7 +68,7 @@ class TestCopyColumn < Test::Unit::TestCase
           found = 0
           expected_sql = <<-SQL
             CREATE TRIGGER 
-              table_name_copy_column_first_column_second_column_on_update
+              table_name_mirror_columns_first_column_second_column_on_update
             BEFORE update ON
               table_name
             FOR EACH ROW
@@ -82,26 +82,26 @@ class TestCopyColumn < Test::Unit::TestCase
           SQL
 
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column" => "second_column")
+            @adapter.add_mirror_columns("table_name", "first_column" => "second_column")
           end
         end
       end
     end
 
-    context "#remove_copy_column" do
+    context "#remove_mirror_columns" do
       [:insert, :update].each do |sql_method|
         context "sql #{sql_method}" do
           should "execute a trigger drop" do
-            expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_#{sql_method};"
+            expected_sql = "DROP TRIGGER IF EXISTS table_name_mirror_columns_first_column_second_column_on_#{sql_method};"
             assert_expects_params @adapter, :execute, expected_sql do
-              @adapter.remove_copy_column("table_name", "first_column" => "second_column")
+              @adapter.remove_mirror_columns("table_name", "first_column" => "second_column")
             end
           end
         end
       end
     end
 
-    context "#copy_column_trigger_name" do
+    context "#mirror_columns_trigger_name" do
       setup do
         @table = "TABLE_NAME"
         @columns = {"FIRST_COLUMN" => "SECOND_COLUMN"}
@@ -109,8 +109,8 @@ class TestCopyColumn < Test::Unit::TestCase
       end
 
       should "generate the expected name" do
-        expected = "TABLE_NAME_copy_column_FIRST_COLUMN_SECOND_COLUMN_on_INSERT"
-        received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
+        expected = "TABLE_NAME_mirror_columns_FIRST_COLUMN_SECOND_COLUMN_on_INSERT"
+        received = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
 
         assert_equal expected, received
       end
@@ -121,12 +121,12 @@ class TestCopyColumn < Test::Unit::TestCase
         end
 
         should "generate a hash for table and column names" do
-          received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
-          assert_match /copy_column_INSERT_\d+/, received
+          received = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
+          assert_match /mirror_columns_INSERT_\d+/, received
         end
 
         should "new name lenght <= 63 characters" do
-          received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
+          received = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
           assert received.size <= 63
         end
       end
@@ -137,7 +137,7 @@ class TestCopyColumn < Test::Unit::TestCase
         end
 
         should "generate a name without columns in it" do
-          received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
+          received = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
           assert_equal "TABLE_NAME_copy_multiple_columns_on_INSERT", received
         end
       end
