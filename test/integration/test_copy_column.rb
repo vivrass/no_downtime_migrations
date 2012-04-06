@@ -70,6 +70,32 @@ class TestCopyColumn < Test::Unit::TestCase
 
       test_user @user, :name => name, :email => email, :password => password
 
+      # Verify modification of old column with NULL
+      name = "create_null_old"
+      email = nil
+      new_email = "create_null_email"
+      password = "create_null_old_password"
+      @user = User.create!(:name => name, :email => nil, :password => password).reload
+      test_user @user, :name => name, :email => email, :password => password
+
+      @user.email = new_email
+      @user.save!
+      @user = User.last
+      test_user @user, :name => name, :email => new_email, :password => password
+
+      # Verify modification of new column with NULL
+      name = "create_null_old"
+      email = nil
+      new_email = "create_null_email"
+      password = "create_null_old_password"
+      @user = User.create!(:name => name, :email => nil, :password => password).reload
+      test_user @user, :name => name, :email => email, :password => password
+
+      @user.email_address = new_email
+      @user.save!
+      @user = User.last
+      test_user @user, :name => name, :email => new_email, :password => password
+
       # Verify drop
       ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_REMOVE_COPY_COLUMN_VERSION)
       User.reset_column_information

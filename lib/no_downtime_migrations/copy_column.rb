@@ -25,10 +25,10 @@ module ActiveRecord
         sql = ""
         columns.each do |source_column, destination_column|
           sql += <<-SQL
-            IF NEW.#{source_column} != OLD.#{source_column} AND #{sql_not_blank("NEW.#{source_column}")} THEN
+            IF (NEW.#{source_column} != OLD.#{source_column} or OLD.#{source_column} IS NULL) AND #{sql_not_blank("NEW.#{source_column}")} THEN
               SET NEW.#{destination_column} = NEW.#{source_column};
             END IF;
-            IF NEW.#{destination_column} != OLD.#{destination_column} AND #{sql_not_blank("NEW.#{destination_column}")} THEN
+            IF (NEW.#{destination_column} != OLD.#{destination_column} or OLD.#{destination_column} IS NULL) AND #{sql_not_blank("NEW.#{destination_column}")} THEN
               SET NEW.#{source_column} = NEW.#{destination_column};
             END IF;
           SQL
