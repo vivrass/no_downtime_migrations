@@ -24,31 +24,66 @@ class TestCopyTrigger < Test::Unit::TestCase
         end
       end
 
-      [:insert, :update].each do |sql_method|
-        context "sql #{sql_method}" do
-          should "execute a old trigger drop" do
-            expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_#{sql_method};"
-            assert_expects_params @adapter, :execute, expected_sql do
-              @adapter.create_copy_column("table_name", "first_column", "second_column")
-            end
+      context "sql insert" do
+        should "execute a old trigger drop" do
+          expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_insert;"
+          assert_expects_params @adapter, :execute, expected_sql do
+            @adapter.create_copy_column("table_name", "first_column", "second_column")
           end
+        end
 
-          should "execute create the trigger" do
-            found = 0
-            expected_sql = <<-SQL
-              CREATE TRIGGER 
-                table_name_copy_column_first_column_second_column_on_#{sql_method}
-              AFTER #{sql_method} ON
-                table_name
-              FOR EACH ROW
-              BEGIN
-                UPDATE table_name SET second_column = first_column;
-              END
-            SQL
+        should "execute create the trigger" do
+          found = 0
+          expected_sql = <<-SQL
+            CREATE TRIGGER 
+              table_name_copy_column_first_column_second_column_on_insert
+            BEFORE insert ON
+              table_name
+            FOR EACH ROW
+            BEGIN
+              IF NEW.first_column IS NOT NULL AND NEW.first_column != '' THEN
+                SET NEW.second_column = NEW.first_column;
+              END IF;
+              IF NEW.second_column IS NOT NULL AND NEW.second_column != '' THEN
+                SET NEW.first_column = NEW.second_column;
+              END IF;
+            END
+          SQL
 
-            assert_expects_params @adapter, :execute, expected_sql do
-              @adapter.create_copy_column("table_name", "first_column", "second_column")
-            end
+          assert_expects_params @adapter, :execute, expected_sql do
+            @adapter.create_copy_column("table_name", "first_column", "second_column")
+          end
+        end
+      end
+
+      context "sql update" do
+        should "execute a old trigger drop" do
+          expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_update;"
+          assert_expects_params @adapter, :execute, expected_sql do
+            @adapter.create_copy_column("table_name", "first_column", "second_column")
+          end
+        end
+
+        should "execute create the trigger" do
+          found = 0
+          expected_sql = <<-SQL
+            CREATE TRIGGER 
+              table_name_copy_column_first_column_second_column_on_update
+            BEFORE update ON
+              table_name
+            FOR EACH ROW
+            BEGIN
+              IF NEW.first_column != OLD.first_column AND NEW.first_column IS NOT NULL AND NEW.first_column != '' THEN
+                SET NEW.second_column = NEW.first_column;
+              END IF;
+              IF NEW.second_column != OLD.second_column AND NEW.second_column IS NOT NULL AND NEW.second_column != '' THEN
+                SET NEW.first_column = NEW.second_column;
+              END IF;
+            END
+          SQL
+
+          assert_expects_params @adapter, :execute, expected_sql do
+            @adapter.create_copy_column("table_name", "first_column", "second_column")
           end
         end
       end
@@ -97,6 +132,15 @@ class TestCopyTrigger < Test::Unit::TestCase
           received = @adapter.send(:copy_column_trigger_name, @table, @source_column, @destination_column, @sql_method)
           assert received.size <= 63
         end
+      end
+    end
+
+    context "#sql_not_blank" do
+      should "generate the expected condition" do
+        expected = "COLUMN_NAME IS NOT NULL AND COLUMN_NAME != ''"
+        received = @adapter.send(:sql_not_blank, "COLUMN_NAME")
+
+        assert_equal expected, received
       end
     end
   end

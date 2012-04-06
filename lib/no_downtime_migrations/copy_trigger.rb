@@ -1,15 +1,32 @@
 module ActiveRecord
   module CopyTrigger
     def create_copy_column(table, source_column, destination_column)
-      # Copy source into destination
-      execute "UPDATE #{table} SET #{destination_column} = #{source_column}"
-
-      # Triggers
-      [:insert, :update].each do |sql_method|
-        create_trigger(copy_column_trigger_name(table, source_column, destination_column, sql_method)).on(table).after(sql_method)  do
-          "UPDATE #{table} SET #{destination_column} = #{source_column}"
-        end
+      # Trigger insert
+      create_trigger(copy_column_trigger_name(table, source_column, destination_column, :insert)).on(table).before(:insert)  do
+        sql = <<-SQL
+          IF #{sql_not_blank("NEW.#{source_column}")} THEN
+            SET NEW.#{destination_column} = NEW.#{source_column};
+          END IF;
+          IF #{sql_not_blank("NEW.#{destination_column}")} THEN
+            SET NEW.#{source_column} = NEW.#{destination_column};
+          END IF;
+        SQL
       end
+
+      # Trigger update
+      create_trigger(copy_column_trigger_name(table, source_column, destination_column, :update)).on(table).before(:update)  do
+        sql = <<-SQL
+          IF NEW.#{source_column} != OLD.#{source_column} AND #{sql_not_blank("NEW.#{source_column}")} THEN
+            SET NEW.#{destination_column} = NEW.#{source_column};
+          END IF;
+          IF NEW.#{destination_column} != OLD.#{destination_column} AND #{sql_not_blank("NEW.#{destination_column}")} THEN
+            SET NEW.#{source_column} = NEW.#{destination_column};
+          END IF;
+        SQL
+      end
+
+      # Copy old column in new one
+      execute "UPDATE #{table} SET #{destination_column} = #{source_column}"
     end
 
     def remove_copy_column(table, source_column, destination_column)
@@ -26,6 +43,10 @@ module ActiveRecord
       end
 
       name
+    end
+
+    def sql_not_blank(column_name)
+      "#{column_name} IS NOT NULL AND #{column_name} != ''"
     end
   end
 end
