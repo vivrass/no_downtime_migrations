@@ -20,7 +20,7 @@ class TestCopyColumn < Test::Unit::TestCase
       should "execute a copy of the first column into the second" do
         expected_sql = "UPDATE table_name SET second_column = first_column"
         assert_expects_params @adapter, :execute, expected_sql do
-          @adapter.create_copy_column("table_name", "first_column", "second_column")
+          @adapter.create_copy_column("table_name", "first_column" => "second_column")
         end
       end
 
@@ -28,7 +28,7 @@ class TestCopyColumn < Test::Unit::TestCase
         should "execute a old trigger drop" do
           expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_insert;"
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column", "second_column")
+            @adapter.create_copy_column("table_name", "first_column" => "second_column")
           end
         end
 
@@ -51,7 +51,7 @@ class TestCopyColumn < Test::Unit::TestCase
           SQL
 
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column", "second_column")
+            @adapter.create_copy_column("table_name", "first_column" => "second_column")
           end
         end
       end
@@ -60,7 +60,7 @@ class TestCopyColumn < Test::Unit::TestCase
         should "execute a old trigger drop" do
           expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_update;"
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column", "second_column")
+            @adapter.create_copy_column("table_name", "first_column" => "second_column")
           end
         end
 
@@ -83,7 +83,7 @@ class TestCopyColumn < Test::Unit::TestCase
           SQL
 
           assert_expects_params @adapter, :execute, expected_sql do
-            @adapter.create_copy_column("table_name", "first_column", "second_column")
+            @adapter.create_copy_column("table_name", "first_column" => "second_column")
           end
         end
       end
@@ -95,7 +95,7 @@ class TestCopyColumn < Test::Unit::TestCase
           should "execute a trigger drop" do
             expected_sql = "DROP TRIGGER IF EXISTS table_name_copy_column_first_column_second_column_on_#{sql_method};"
             assert_expects_params @adapter, :execute, expected_sql do
-              @adapter.remove_copy_column("table_name", "first_column", "second_column")
+              @adapter.remove_copy_column("table_name", "first_column" => "second_column")
             end
           end
         end
@@ -104,33 +104,42 @@ class TestCopyColumn < Test::Unit::TestCase
 
     context "#copy_column_trigger_name" do
       setup do
-        @table = "table_name"
-        @source_column = "first_column"
-        @destination_column = "second_column"
-        @sql_method = "insert"
+        @table = "TABLE_NAME"
+        @columns = {"FIRST_COLUMN" => "SECOND_COLUMN"}
+        @sql_method = "INSERT"
       end
 
       should "generate the expected name" do
-        expected = "#{@table}_copy_column_#{@source_column}_#{@destination_column}_on_#{@sql_method}"
-        received = @adapter.send(:copy_column_trigger_name, @table, @source_column, @destination_column, @sql_method)
+        expected = "TABLE_NAME_copy_column_FIRST_COLUMN_SECOND_COLUMN_on_INSERT"
+        received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
 
         assert_equal expected, received
       end
 
       context "expected name > 63 characters" do
         setup do
-          @source_column = "source_long_name" * 10
-          @destination_column = "destination_long_name" * 10
+          @columns = {"source_long_name" * 10 => "destination_long_name" * 10}
         end
 
         should "generate a hash for table and column names" do
-          received = @adapter.send(:copy_column_trigger_name, @table, @source_column, @destination_column, @sql_method)
-          assert_match /copy_column_#{@sql_method}_\d+/, received
+          received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
+          assert_match /copy_column_INSERT_\d+/, received
         end
 
         should "new name lenght <= 63 characters" do
-          received = @adapter.send(:copy_column_trigger_name, @table, @source_column, @destination_column, @sql_method)
+          received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
           assert received.size <= 63
+        end
+      end
+
+      context "multiple columns" do
+        setup do
+          @columns["new_src_column"] = "new_dest_column"
+        end
+
+        should "generate a name without columns in it" do
+          received = @adapter.send(:copy_column_trigger_name, @table, @columns, @sql_method)
+          assert_equal "TABLE_NAME_copy_multiple_columns_on_INSERT", received
         end
       end
     end
