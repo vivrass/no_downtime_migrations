@@ -12,12 +12,14 @@ class TestCopyColumn < Test::Unit::TestCase
       configure_adapter
     end
 
+    # Test everything in the same test so we don't depend on schema state before each state (i.e. faster tests)
     should "Have the expected behaviour" do
       assert_equal 0, ActiveRecord::Base.connection.execute("SHOW TRIGGERS;").count
 
+      old_name = "John Doe"
       old_email = "john@gmail.com"
       old_password = "psw"
-      @user = User.create!(:name => "John Doe", :email => old_email, :password => old_password)
+      @user = User.create!(:name => old_name, :email => old_email, :password => old_password)
 
       assert !@user.respond_to?(:email_address)
       assert !@user.respond_to?(:encrypted_password)
@@ -30,10 +32,7 @@ class TestCopyColumn < Test::Unit::TestCase
       @user = User.last
 
       # Verify first copy
-      assert_equal old_email,    @user.email
-      assert_equal old_email,    @user.email_address
-      assert_equal old_password, @user.password
-      assert_equal old_password, @user.encrypted_password
+      test_user @user, :name => old_name, :email => old_email, :password => old_password
 
       # Verify modification of old column
       new_email = "john_email@gmail.com"
@@ -43,10 +42,7 @@ class TestCopyColumn < Test::Unit::TestCase
       @user.save!
       @user = User.last
 
-      assert_equal new_email,    @user.email
-      assert_equal new_email,    @user.email_address
-      assert_equal new_password, @user.password
-      assert_equal new_password, @user.encrypted_password
+      test_user @user, :name => old_name, :email => new_email, :password => new_password
 
       # Verify modification of new column
       new_email = "john_email_address@gmail.com"
@@ -56,12 +52,25 @@ class TestCopyColumn < Test::Unit::TestCase
       @user.save!
       @user = User.last
 
-      assert_equal new_email,    @user.email
-      assert_equal new_email,    @user.email_address
-      assert_equal new_password, @user.password
-      assert_equal new_password, @user.encrypted_password
+      test_user @user, :name => old_name, :email => new_email, :password => new_password
 
+      # Verify insertion with old column
+      name = "create_old"
+      email = "create_old_email@gmail.com"
+      password = "create_old_password"
+      @user = User.create!(:name => name, :email => email, :password => password).reload
 
+      test_user @user, :name => name, :email => email, :password => password
+
+      # Verify insertion with new column
+      name = "create_new"
+      email = "create_new_email@gmail.com"
+      password = "create_new_password"
+      @user = User.create!(:name => name, :email => email, :password => password).reload
+
+      test_user @user, :name => name, :email => email, :password => password
+
+      # Verify drop
       ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_REMOVE_COPY_COLUMN_VERSION)
       User.reset_column_information
       assert_equal 0, ActiveRecord::Base.connection.execute("SHOW TRIGGERS;").count
@@ -70,6 +79,17 @@ class TestCopyColumn < Test::Unit::TestCase
   end
 
   private
+
+  def test_user(user, params)
+    assert_equal params[:name], user.name
+
+    assert_equal params[:email], user.email
+    assert_equal params[:email], user.email_address
+
+    assert_equal params[:password], user.password
+    assert_equal params[:password], user.encrypted_password
+  end
+
   def configure_adapter
     db_name = 'no_downtime_migrations_test'
     config = {:database => db_name, :username => 'root', :adapter => "mysql", :host => 'localhost'}
