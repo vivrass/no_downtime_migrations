@@ -1,5 +1,5 @@
 module ActiveRecord
-  module CopyTrigger
+  module CopyColumn
     def create_copy_column(table, source_column, destination_column)
       # Trigger insert
       create_trigger(copy_column_trigger_name(table, source_column, destination_column, :insert)).on(table).before(:insert)  do
@@ -51,4 +51,4 @@ module ActiveRecord
   end
 end
 
-ActiveRecord::ConnectionAdapters::AbstractAdapter.class_eval { include ActiveRecord::CopyTrigger }
+ActiveRecord::ConnectionAdapters::AbstractAdapter.class_eval { include ActiveRecord::CopyColumn }

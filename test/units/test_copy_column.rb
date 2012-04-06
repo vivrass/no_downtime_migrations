@@ -9,8 +9,8 @@ class MockAdapter < ActiveRecord::ConnectionAdapters::AbstractAdapter
   end
 end
 
-class TestCopyTrigger < Test::Unit::TestCase
-  context "given a MySQL adapter" do
+class TestCopyColumn < Test::Unit::TestCase
+  context "given an adapter" do
     setup do
       @connection = NullConnection
       @adapter = MockAdapter.new(@connection)

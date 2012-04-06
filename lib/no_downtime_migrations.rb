@@ -1,1 +1,1 @@
-require 'no_downtime_migrations/copy_trigger'
+require 'no_downtime_migrations/copy_column'
