@@ -1,7 +1,7 @@
 module ActiveRecord
   module MirrorColumns
     def add_mirror_columns(table, columns)
-      raise ArgumentError.new("columns need to be a Hash, got #{columns.class}") if Hash === columns.class
+      raise ArgumentError.new("columns need to be a Hash, got #{columns.class}") unless columns.is_a?(Hash)
 
       # Trigger insert
       create_trigger(mirror_columns_trigger_name(table, columns, :insert)).on(table).before(:insert)  do
@@ -45,7 +45,7 @@ module ActiveRecord
     end
 
     def remove_mirror_columns(table, columns)
-      raise ArgumentError.new("columns need to be a Hash, got #{columns.class}") if Hash === columns.class
+      raise ArgumentError.new("columns need to be a Hash, got #{columns.class}") unless columns.is_a?(Hash)
 
       [:insert, :update].each do |sql_method|
         drop_trigger mirror_columns_trigger_name(table, columns, sql_method), table
