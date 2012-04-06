@@ -74,27 +74,62 @@ class TestCopyColumn < Test::Unit::TestCase
       name = "create_null_old"
       email = nil
       new_email = "create_null_email"
-      password = "create_null_old_password"
-      @user = User.create!(:name => name, :email => nil, :password => password).reload
+      password = ''
+      new_password = "create_null_old_password"
+      @user = User.create!(:name => name, :email => email, :password => password).reload
       test_user @user, :name => name, :email => email, :password => password
 
       @user.email = new_email
+      @user.password = new_password
       @user.save!
       @user = User.last
-      test_user @user, :name => name, :email => new_email, :password => password
+      test_user @user, :name => name, :email => new_email, :password => new_password
 
       # Verify modification of new column with NULL
-      name = "create_null_old"
+      name = "create_null_new"
       email = nil
       new_email = "create_null_email"
-      password = "create_null_old_password"
-      @user = User.create!(:name => name, :email => nil, :password => password).reload
+      password = ''
+      password = "create_null_new_password"
+      @user = User.create!(:name => name, :email => email, :password => password).reload
       test_user @user, :name => name, :email => email, :password => password
 
       @user.email_address = new_email
+      @user.encrypted_password = new_password
       @user.save!
       @user = User.last
-      test_user @user, :name => name, :email => new_email, :password => password
+      test_user @user, :name => name, :email => new_email, :password => new_password
+
+
+      # Verify modification of old column to NULL
+      name = "create_old_to_null"
+      email = "create_old_email_to_null"
+      new_email = nil
+      password = "create_old_password_to_null"
+      new_password = ''
+      @user = User.create!(:name => name, :email => email, :password => password).reload
+      test_user @user, :name => name, :email => email, :password => password
+
+      @user.email = new_email
+      @user.password = new_password
+      @user.save!
+      @user = User.last
+      test_user @user, :name => name, :email => new_email, :password => new_password
+
+      # Verify modification of new column with NULL
+      name = "create_new_to_null"
+      email = "create_new_email_to_null"
+      new_email = nil
+      password = "create_new_password_to_null"
+      new_password = ''
+      @user = User.create!(:name => name, :email => email, :password => password).reload
+      test_user @user, :name => name, :email => email, :password => password
+
+      @user.email_address = new_email
+      @user.encrypted_password = new_password
+      @user.save!
+      @user = User.last
+      test_user @user, :name => name, :email => new_email, :password => new_password
 
       # Verify drop
       ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_REMOVE_COPY_COLUMN_VERSION)

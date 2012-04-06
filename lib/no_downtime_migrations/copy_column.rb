@@ -25,10 +25,9 @@ module ActiveRecord
         sql = ""
         columns.each do |source_column, destination_column|
           sql += <<-SQL
-            IF (NEW.#{source_column} != OLD.#{source_column} or OLD.#{source_column} IS NULL) AND #{sql_not_blank("NEW.#{source_column}")} THEN
+            IF #{sql_update_condition(source_column)} THEN
               SET NEW.#{destination_column} = NEW.#{source_column};
-            END IF;
-            IF (NEW.#{destination_column} != OLD.#{destination_column} or OLD.#{destination_column} IS NULL) AND #{sql_not_blank("NEW.#{destination_column}")} THEN
+            ELSEIF #{sql_update_condition(destination_column)} THEN
               SET NEW.#{source_column} = NEW.#{destination_column};
             END IF;
           SQL
@@ -69,6 +68,10 @@ module ActiveRecord
 
     def sql_not_blank(column_name)
       "#{column_name} IS NOT NULL AND #{column_name} != ''"
+    end
+
+    def sql_update_condition(column_name)
+      "NEW.#{column_name} != OLD.#{column_name} OR (NEW.#{column_name} IS NOT NULL AND OLD.#{column_name} IS NULL) OR (NEW.#{column_name} IS NULL AND OLD.#{column_name} IS NOT NULL)"
     end
   end
 end

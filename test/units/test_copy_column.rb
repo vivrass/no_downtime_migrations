@@ -73,10 +73,9 @@ class TestCopyColumn < Test::Unit::TestCase
               table_name
             FOR EACH ROW
             BEGIN
-              IF (NEW.first_column != OLD.first_column OR OLD.first_column IS NULL) AND NEW.first_column IS NOT NULL AND NEW.first_column != '' THEN
+              IF NEW.first_column != OLD.first_column OR (NEW.first_column IS NOT NULL AND OLD.first_column IS NULL) OR (NEW.first_column IS NULL AND OLD.first_column IS NOT NULL) THEN
                 SET NEW.second_column = NEW.first_column;
-              END IF;
-              IF (NEW.second_column != OLD.second_column OR OLD.second_column IS NULL) AND NEW.second_column IS NOT NULL AND NEW.second_column != '' THEN
+              ELSEIF NEW.second_column != OLD.second_column OR (NEW.second_column IS NOT NULL AND OLD.second_column IS NULL) OR (NEW.second_column IS NULL AND OLD.second_column IS NOT NULL) THEN
                 SET NEW.first_column = NEW.second_column;
               END IF;
             END
