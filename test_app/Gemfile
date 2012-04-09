@@ -2,7 +2,10 @@ source 'https://rubygems.org'
 
 gem 'rails', '3.2.3'
 
-gem 'mysql'
+gem 'hairtrigger', :git => 'git://github.com/vivrass/hair_trigger.git', :require => "hair_trigger"
+gem 'no_downtime_migrations', :path => ".."
+
+gem 'mysql2'
 gem 'json'
 
 # Gems used only for assets and not required
