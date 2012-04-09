@@ -2,6 +2,16 @@ class UsersController < ApplicationController
   # GET /users
   # GET /users.json
   def index
+    # Update a user to verify data corruption
+    offset = rand(20) + 1
+    user = User.order(:id).offset(offset).first
+    user.email = user.email.to_i + 1
+    user.save
+
+    user = User.order(:id).first
+    user.name = user.name.to_i + 1
+    user.save
+
     @users = User.page(params[:page])
 
     respond_to do |format|

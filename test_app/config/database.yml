@@ -7,6 +7,10 @@
   password:
   reconnect: true
 
+production:
+  <<: *defaults
+  database: no_downtime_migrations_development
+
 development:
   <<: *defaults
   database: no_downtime_migrations_development
