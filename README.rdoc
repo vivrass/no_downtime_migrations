@@ -1,6 +1,32 @@
 = no_downtime_migrations
 
-Description goes here.
+No Downtime Migrations is useful when you want to limit as possible your downtime when upgrading the production environment.
+
+== Strategies
+=== Mirror columns (Rename databse columns)
+
+The strategy to rename a database column is the following:
+1. Add a new column(s) in the table with the expected characteristic
+2. Add database trigger (keep old and new columns in sync)
+3. Update your code
+4. Remove the old columns and the triggers
+
+To create the triggers, the method call in migration is : <i>+add_mirror_column+ TABLE_NAME, {OLD_COLUMN => NEW_COLUMN}</i>. You can see an example in test_app/db/migrate/2_create_mirror_columns.rb.
+
+To remove the triggers, the method call in migration is : <i>+remove_mirror_column+ TABLE_NAME, {OLD_COLUMN => NEW_COLUMN}</i>. You can see an example in test_app/db/migrate/3_remove_mirror_columns.rb.
+
+*Advantages*
+
+You don't need to stop you application to migrate your database. Once the migration with triggers is made your old and new code will be compatible with the database without any more effort in you application.
+You'll even be able to rollback you application if any problem occur during the update without loosing any data.
+
+*Performance*
+
+In the sample app in test_app for 100k users in the database
+- add_mirror_columns takes around 4s (with the column data copy) + column creation time (1.5s)
+- remove_mirror_columns takes around 0.006s + column remove time (1.3s)
+- read is constant before, during and after triggers
+- write while trigger is present is 0.1ms slower (1s / 10000 users)
 
 == Contributing to no_downtime_migrations
  
