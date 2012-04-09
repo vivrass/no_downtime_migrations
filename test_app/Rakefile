@@ -2,6 +2,21 @@
 # Add your own tasks in files placed in lib/tasks ending in .rake,
 # for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 
+# don't drop the test database; migrate it back to 0
+Rake::TaskManager.class_eval do
+  def delete_task(task_name)
+    @tasks.delete(task_name.to_s)
+  end
+  Rake.application.delete_task("db:test:purge")
+end
+namespace :db do
+  namespace :test do
+    task :purge do
+      ActiveRecord::Migrator.migrate("db/migrate/", 1)
+    end
+  end
+end
+
 require File.expand_path('../config/application', __FILE__)
 
 TestApp::Application.load_tasks

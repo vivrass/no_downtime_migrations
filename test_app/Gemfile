@@ -8,6 +8,9 @@ gem 'no_downtime_migrations', :path => ".."
 gem 'mysql2'
 gem 'json'
 
+# Pagination
+gem 'kaminari'
+
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
@@ -23,5 +26,10 @@ end
 gem 'jquery-rails'
 
 group :development, :test do
+  gem 'shoulda'
   gem 'capybara'
+  #gem 'database_cleaner'
+
+  gem 'ruby-debug'
 end
+

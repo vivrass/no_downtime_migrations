@@ -1,6 +1,6 @@
 class CreateMirrorColumns < ActiveRecord::Migration
   def self.up
-    add_column :users, :email_address, :string, :limit => 100
+    add_column :users, :email_address,      :string, :limit => 100
     # test with empty default value
     add_column :users, :encrypted_password, :string, :limit => 128, :default => "", :null => false
 
