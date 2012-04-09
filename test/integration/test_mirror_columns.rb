@@ -2,7 +2,7 @@ require 'helper'
 require 'logger'
 
 class TestMirrorColumns < Test::Unit::TestCase
-  MIGRATION_PATH = "#{File.dirname(__FILE__)}/migrations"
+  MIGRATION_PATH = "#{File.dirname(__FILE__)}/../../test_app/db/migrate"
   MIGRATION_CREATE_USER_VERSION        = 1;
   MIGRATION_CREATE_MIRROR_COLUMN_VERSION = 2;
   MIGRATION_REMOVE_MIRROR_COLUMN_VERSION = 3;
