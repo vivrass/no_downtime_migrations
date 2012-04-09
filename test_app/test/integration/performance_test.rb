@@ -19,6 +19,11 @@ class PerformanceTest < ActionDispatch::IntegrationTest
 
     context 'Verify performance at each step' do
       should "READ" do
+        execution_time = Benchmark.measure do
+          create_users
+        end
+        puts "Create users : #{execution_time}"
+
         puts "#{"#"*80}\n# READ\n#{"#"*80}"
         visit("/") # Start the server
 
@@ -84,6 +89,19 @@ class PerformanceTest < ActionDispatch::IntegrationTest
         end
         puts "Insert #{TEST_COUNT} users : #{execution_time}"
       end
+    end
+  end
+
+private
+  def create_users(count=100000)
+    sql_values = []
+    missing = count - User.count
+    if missing > 0
+      missing.times do |i|
+        sql_values << "('#{i}', '#{i}@email', 'psw_#{i}')"
+      end
+
+      ActiveRecord::Base.connection.execute("INSERT INTO users (name, email, password) VALUES #{sql_values.join(",")};") unless sql_values.empty?
     end
   end
 end
