@@ -152,7 +152,7 @@ class TestMirrorColumns < Test::Unit::TestCase
   end
 
   def configure_adapter
-    db_name = 'no_downtime_migrations_test'
+    db_name = 'no_downtime_migrations_gem_test'
     config = {:database => db_name, :username => 'root', :adapter => "mysql", :host => 'localhost'}
 
     ret = `echo "drop database if exists #{db_name}; create database #{db_name};" | mysql -u root`
