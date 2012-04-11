@@ -115,6 +115,16 @@ class TestMirrorColumns < Test::Unit::TestCase
         assert_equal expected, received
       end
 
+      should "be reversible" do
+        reverse_columns = {}
+        @columns.each {|k,v| reverse_columns[v] = k}
+
+        first = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
+        second = @adapter.send(:mirror_columns_trigger_name, @table, reverse_columns, @sql_method)
+
+        assert_equal first, second
+      end
+
       context "expected name > 63 characters" do
         setup do
           @columns = {"source_long_name" * 10 => "destination_long_name" * 10}
@@ -129,6 +139,16 @@ class TestMirrorColumns < Test::Unit::TestCase
           received = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
           assert received.size <= 63
         end
+
+        should "be reversible" do
+          reverse_columns = {}
+          @columns.each {|k,v| reverse_columns[v] = k}
+
+          first = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
+          second = @adapter.send(:mirror_columns_trigger_name, @table, reverse_columns, @sql_method)
+
+          assert_equal first, second
+        end
       end
 
       context "multiple columns" do
@@ -138,7 +158,7 @@ class TestMirrorColumns < Test::Unit::TestCase
 
         should "generate a name without columns in it" do
           received = @adapter.send(:mirror_columns_trigger_name, @table, @columns, @sql_method)
-          assert_equal "TABLE_NAME_copy_multiple_columns_on_INSERT", received
+          assert_equal "TABLE_NAME_mirror_multiple_columns_on_INSERT", received
         end
       end
     end

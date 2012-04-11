@@ -54,13 +54,14 @@ module ActiveRecord
 
     protected
     def mirror_columns_trigger_name(table, columns, sql_method)
-      name = if columns.size == 1
-               "#{table}_mirror_columns_#{columns.keys.first}_#{columns.values.first}_on_#{sql_method}"
+      column_names = (columns.keys + columns.values).map(&:to_s).sort
+      name = if column_names.size == 2
+               "#{table}_mirror_columns_#{column_names.first}_#{column_names.second}_on_#{sql_method}"
              else
-               "#{table}_copy_multiple_columns_on_#{sql_method}"
+               "#{table}_mirror_multiple_columns_on_#{sql_method}"
              end
       if name.size > 63
-        name = "mirror_columns_#{sql_method}_#{Digest::SHA1.hexdigest(columns.map{|k,v| "#{k} => #{v}"}.join(", "))}"
+        name = "mirror_columns_#{sql_method}_#{Digest::SHA1.hexdigest(column_names.join(", "))}"
       end
 
       name
