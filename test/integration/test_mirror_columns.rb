@@ -13,7 +13,7 @@ class TestMirrorColumns < Test::Unit::TestCase
     end
 
     # Test everything in the same test so we don't depend on schema state before each state (i.e. faster tests)
-    should "Have the expected behaviour" do
+    should "Have the expected update behaviour" do
       assert_equal 0, ActiveRecord::Base.connection.execute("SHOW TRIGGERS;").count
 
       old_name = "John Doe"
@@ -135,8 +135,134 @@ class TestMirrorColumns < Test::Unit::TestCase
       ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_REMOVE_MIRROR_COLUMN_VERSION)
       User.reset_column_information
       assert_equal 0, ActiveRecord::Base.connection.execute("SHOW TRIGGERS;").count
+
+      @user = User.first
+      assert !@user.respond_to?(:email)
+      assert !@user.respond_to?(:password)
     end
 
+    should "have the expected transition behaviour and support rollback" do
+      NB_USERS = 10
+      users_attributes = {}
+      NB_USERS.times do |i|
+        p = {:name => "name_#{i}", :email => "#{i}@email.com", :password => "psw_#{i}"}
+        user = User.create!(p)
+        users_attributes[user.id] = p
+      end
+
+      users_attributes[users_attributes.keys[0]] = {:name => "step_0", :email => "step_0@email.com", :password => "step_0_password"}
+      User.find(users_attributes.keys[0]).update_attributes!(users_attributes.values[0])
+
+      users_attributes.each do |id, attributes|
+        user = User.find(id)
+        email = attributes[:email] || attributes[:email_address]
+        password = attributes[:password] || attributes[:encrypted_password]
+
+        assert_equal attributes[:name], user.name
+        assert_equal email, user.email
+        assert_equal password, user.password
+      end
+
+      # Migrate to add mirror
+      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_CREATE_MIRROR_COLUMN_VERSION)
+      User.reset_column_information
+
+      users_attributes[users_attributes.keys[1]] = {:name => "step_1", :email => "step_1@email.com", :password => "step_1_password"}
+      User.find(users_attributes.keys[1]).update_attributes!(users_attributes.values[1])
+
+      users_attributes[users_attributes.keys[2]] = {:name => "step_2", :email_address => "step_2@email.com", :encrypted_password => "step_2_password"}
+      User.find(users_attributes.keys[2]).update_attributes!(users_attributes.values[2])
+
+      users_attributes.each do |id, attributes|
+        user = User.find(id)
+        email = attributes[:email] || attributes[:email_address]
+        password = attributes[:password] || attributes[:encrypted_password]
+
+        assert_equal attributes[:name], user.name
+        assert_equal email, user.email
+        assert_equal email, user.email_address
+        assert_equal password, user.password
+        assert_equal password, user.encrypted_password
+      end
+
+      # Migrate to remove mirror
+      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_REMOVE_MIRROR_COLUMN_VERSION)
+      User.reset_column_information
+
+      users_attributes[users_attributes.keys[3]] = {:name => "step_3", :email_address => "step_3@email.com", :encrypted_password => "step_3_password"}
+      User.find(users_attributes.keys[3]).update_attributes!(users_attributes.values[3])
+
+      users_attributes.each do |id, attributes|
+        user = User.find(id)
+        email = attributes[:email] || attributes[:email_address]
+        password = attributes[:password] || attributes[:encrypted_password]
+
+        assert_equal attributes[:name], user.name
+        assert_equal email, user.email_address
+        assert_equal password, user.encrypted_password
+      end
+
+      # Rollback to add mirror
+      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_CREATE_MIRROR_COLUMN_VERSION)
+      User.reset_column_information
+
+      users_attributes[users_attributes.keys[4]] = {:name => "step_4", :email => "step_4@email.com", :password => "step_4_password"}
+      User.find(users_attributes.keys[4]).update_attributes!(users_attributes.values[4])
+
+      users_attributes.values[users_attributes.keys[5]] = {:name => "step_5", :email_address => "step_5@email.com", :encrypted_password => "step_5_password"}
+      User.find(users_attributes.keys[5]).update_attributes!(users_attributes.values[5])
+
+      users_attributes.each do |id, attributes|
+        user = User.find(id)
+        email = attributes[:email] || attributes[:email_address]
+        password = attributes[:password] || attributes[:encrypted_password]
+
+        assert_equal attributes[:name], user.name
+        assert_equal email, user.email
+        assert_equal email, user.email_address
+        assert_equal password, user.password
+        assert_equal password, user.encrypted_password
+      end
+
+      # Rollback to create tables
+      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_CREATE_USER_VERSION)
+      User.reset_column_information
+
+      users_attributes.values[users_attributes.keys[6]] = {:name => "step_6", :email => "step_6@email.com", :password => "step_6_password"}
+      User.find(users_attributes.keys[6]).update_attributes!(users_attributes.values[6])
+
+      users_attributes.each do |id, attributes|
+        user = User.find(id)
+        email = attributes[:email] || attributes[:email_address]
+        password = attributes[:password] || attributes[:encrypted_password]
+
+        assert_equal attributes[:name], user.name
+        assert_equal email, user.email
+        assert_equal password, user.password
+      end
+
+      # Migrate to add mirror
+      ActiveRecord::Migrator.migrate(MIGRATION_PATH, MIGRATION_CREATE_MIRROR_COLUMN_VERSION)
+      User.reset_column_information
+
+      users_attributes[users_attributes.keys[7]] = {:name => "step_7", :email => "step_7@email.com", :password => "step_7_password"}
+      User.find(users_attributes.keys[7]).update_attributes!(users_attributes.values[7])
+
+      users_attributes[users_attributes.keys[8]] = {:name => "step_8", :email_address => "step_8@email.com", :encrypted_password => "step_8_password"}
+      User.find(users_attributes.keys[8]).update_attributes!(users_attributes.values[8])
+
+      users_attributes.each do |id, attributes|
+        user = User.find(id)
+        email = attributes[:email] || attributes[:email_address]
+        password = attributes[:password] || attributes[:encrypted_password]
+
+        assert_equal attributes[:name], user.name
+        assert_equal email, user.email
+        assert_equal email, user.email_address
+        assert_equal password, user.password
+        assert_equal password, user.encrypted_password
+      end
+    end
   end
 
   private
