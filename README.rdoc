@@ -3,7 +3,7 @@
 No Downtime Migrations is useful when you want to limit as possible your downtime when upgrading the production environment.
 
 == Strategies
-=== Mirror columns (Rename databse columns)
+=== Mirror columns (Rename database columns)
 
 The strategy to rename a database column is the following:
 1. Add a new column(s) in the table with the expected characteristic
@@ -40,6 +40,6 @@ In the sample app in test_app for 100k users in the database
 
 == Copyright
 
-Copyright (c) 2012 Martin Provencher. See LICENSE.txt for
+Copyright (c) 2012 PagerDuty inc. See LICENSE.txt for
 further details.
 

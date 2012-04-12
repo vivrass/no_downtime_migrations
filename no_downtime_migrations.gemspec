@@ -8,10 +8,10 @@ Gem::Specification.new do |s|
   s.version = "0.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
-  s.authors = ["Martin Provencher"]
-  s.date = "2012-04-05"
+  s.authors = ["PagerDuty", "Martin Provencher"]
+  s.date = "2012-04-12"
   s.description = "If downtime is not an option for you, this gem will help you manage your migration with that requirement."
-  s.email = "mprovencher86@gmail.com"
+  s.email = "opensource@pagerduty.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
     "README.rdoc"
@@ -30,7 +30,75 @@ Gem::Specification.new do |s|
     "no_downtime_migrations.gemspec",
     "rails/init.rb",
     "test/helper.rb",
-    "test/units/test_mirror_columns.rb"
+    "test/integration/test_mirror_columns.rb",
+    "test/units/test_mirror_columns.rb",
+    "test_app/.gitignore",
+    "test_app/Gemfile",
+    "test_app/Gemfile.lock",
+    "test_app/README.rdoc",
+    "test_app/Rakefile",
+    "test_app/app/assets/images/rails.png",
+    "test_app/app/assets/javascripts/application.js",
+    "test_app/app/assets/stylesheets/application.css",
+    "test_app/app/assets/stylesheets/scaffolds.css.scss",
+    "test_app/app/controllers/application_controller.rb",
+    "test_app/app/controllers/users_controller.rb",
+    "test_app/app/helpers/application_helper.rb",
+    "test_app/app/mailers/.gitkeep",
+    "test_app/app/models/.gitkeep",
+    "test_app/app/models/user.rb",
+    "test_app/app/views/layouts/application.html.erb",
+    "test_app/app/views/users/_form.html.erb",
+    "test_app/app/views/users/edit.html.erb",
+    "test_app/app/views/users/index.html.erb",
+    "test_app/app/views/users/new.html.erb",
+    "test_app/app/views/users/show.html.erb",
+    "test_app/config.ru",
+    "test_app/config/application.rb",
+    "test_app/config/boot.rb",
+    "test_app/config/database.yml",
+    "test_app/config/environment.rb",
+    "test_app/config/environments/development.rb",
+    "test_app/config/environments/production.rb",
+    "test_app/config/environments/test.rb",
+    "test_app/config/initializers/backtrace_silencers.rb",
+    "test_app/config/initializers/inflections.rb",
+    "test_app/config/initializers/mime_types.rb",
+    "test_app/config/initializers/secret_token.rb",
+    "test_app/config/initializers/session_store.rb",
+    "test_app/config/initializers/wrap_parameters.rb",
+    "test_app/config/locales/en.yml",
+    "test_app/config/routes.rb",
+    "test_app/db/migrate/1_create_user.rb",
+    "test_app/db/migrate/2_create_mirror_columns.rb",
+    "test_app/db/migrate/3_remove_mirror_columns.rb",
+    "test_app/db/schema.rb",
+    "test_app/db/seeds.rb",
+    "test_app/lib/assets/.gitkeep",
+    "test_app/lib/tasks/.gitkeep",
+    "test_app/log/.gitkeep",
+    "test_app/public/404.html",
+    "test_app/public/422.html",
+    "test_app/public/500.html",
+    "test_app/public/favicon.ico",
+    "test_app/public/robots.txt",
+    "test_app/script/rails",
+    "test_app/test/fixtures/.gitkeep",
+    "test_app/test/fixtures/fill_users.rb",
+    "test_app/test/fixtures/users.yml",
+    "test_app/test/functional/.gitkeep",
+    "test_app/test/functional/users_controller_test.rb",
+    "test_app/test/integration/.gitkeep",
+    "test_app/test/integration/performance_test.rb",
+    "test_app/test/performance/browsing_test.rb",
+    "test_app/test/test_helper.rb",
+    "test_app/test/test_helpers/capybara_helper.rb",
+    "test_app/test/unit/.gitkeep",
+    "test_app/test/unit/helpers/users_helper_test.rb",
+    "test_app/test/unit/user_test.rb",
+    "test_app/vendor/assets/javascripts/.gitkeep",
+    "test_app/vendor/assets/stylesheets/.gitkeep",
+    "test_app/vendor/plugins/.gitkeep"
   ]
   s.homepage = "http://github.com/vivrass/no_downtime_migrations"
   s.licenses = ["MIT"]
@@ -50,6 +118,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<bundler>, [">= 1.0.0"])
       s.add_development_dependency(%q<jeweler>, ["~> 1.8.3"])
       s.add_development_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_development_dependency(%q<mysql>, [">= 0"])
     else
       s.add_dependency(%q<activerecord>, [">= 2.3.0"])
       s.add_dependency(%q<hairtrigger>, [">= 0.1.13"])
@@ -59,6 +128,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<bundler>, [">= 1.0.0"])
       s.add_dependency(%q<jeweler>, ["~> 1.8.3"])
       s.add_dependency(%q<ruby-debug>, [">= 0"])
+      s.add_dependency(%q<mysql>, [">= 0"])
     end
   else
     s.add_dependency(%q<activerecord>, [">= 2.3.0"])
@@ -69,6 +139,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<bundler>, [">= 1.0.0"])
     s.add_dependency(%q<jeweler>, ["~> 1.8.3"])
     s.add_dependency(%q<ruby-debug>, [">= 0"])
+    s.add_dependency(%q<mysql>, [">= 0"])
   end
 end
 

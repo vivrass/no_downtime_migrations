@@ -19,8 +19,8 @@ Jeweler::Tasks.new do |gem|
   gem.license = "MIT"
   gem.summary = %Q{Migrate your code to prodution without downtime}
   gem.description = %Q{If downtime is not an option for you, this gem will help you manage your migration with that requirement.}
-  gem.email = "mprovencher86@gmail.com"
-  gem.authors = ["Martin Provencher"]
+  gem.email = "opensource@pagerduty.com"
+  gem.authors = ["PagerDuty", "Martin Provencher"]
   # dependencies defined in Gemfile
 end
 Jeweler::RubygemsDotOrgTasks.new
